@@ -3,6 +3,7 @@ package hr.techtitans.users.controllers;
 import hr.techtitans.users.dtos.UserDto;
 import hr.techtitans.users.models.User;
 import hr.techtitans.users.services.UserService;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,25 @@ public class UserController {
         return new ResponseEntity<List<UserDto>>(userService.allUsers(), HttpStatus.OK);
     }
 
+    @GetMapping("/{userId}")
+    public ResponseEntity<?> getUserById(@PathVariable String userId){
+        try {
+            UserDto userDto = userService.getUserById(userId);
+
+            if (userDto != null) {
+                return new ResponseEntity<>(userDto, HttpStatus.OK);
+            } else {
+                String errorMessage = "User with id: " + userId + " is not found.";
+                return new ResponseEntity<>(errorMessage, HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception ex) {
+
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+
     @PostMapping("/create")
     public ResponseEntity<Object> addUser(@RequestBody Map<String, Object> payload) {
         try {
@@ -34,11 +54,11 @@ public class UserController {
         }
     }
 
-    @DeleteMapping("/{userId}")
+    @DeleteMapping("/delete/{userId}")
     public ResponseEntity<Object> deleteUser(@PathVariable String userId) {
         return userService.deleteUserById(userId);
     }
-    @DeleteMapping("/")
+    @DeleteMapping("/delete/")
     public ResponseEntity<String> noUserIdProvided() {
         return new ResponseEntity<>("Please provide a user ID", HttpStatus.BAD_REQUEST);
     }

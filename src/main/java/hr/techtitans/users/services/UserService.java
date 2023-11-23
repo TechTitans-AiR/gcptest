@@ -19,6 +19,7 @@ import java.util.List;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -72,6 +73,19 @@ public class UserService {
                 userStatus
         );
     }
+
+    public UserDto getUserById(String userId) {
+        ObjectId objectId = new ObjectId(userId);
+        Optional<User> optionalUser = userRepository.findById(objectId);
+
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            return mapToUserDto(user);
+        } else {
+            return null;
+        }
+    }
+
 
     public ResponseEntity<Object> addUser(Map<String,Object> payload) {
         try {
