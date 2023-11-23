@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserRoleRepository extends MongoRepository<UserRole, ObjectId> {
+    UserRole findByName(String name);
 }

@@ -7,10 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -22,5 +25,16 @@ public class UserController {
     @GetMapping
     public ResponseEntity<List<UserDto>> getAllUsers(){
         return new ResponseEntity<List<UserDto>>(userService.allUsers(), HttpStatus.OK);
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<Object> addUser(@RequestBody Map<String, Object> payload) {
+        try {
+            return new ResponseEntity<>(userService.addUser(payload), HttpStatus.CREATED);
+        } catch (UserService.UserCreationException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>("An error occurred", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
