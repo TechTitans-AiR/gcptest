@@ -93,12 +93,18 @@ public class UserService {
             user.setEmail((String) payload.get("email"));
             user.setDate_created(currentDateTime);
             user.setDate_modified(currentDateTime);
-            user.setAddress((String) payload.get("address"));
-            user.setPhone((String) payload.get("phone"));
+            if(isValid((String) payload.get("address"))) {
+                user.setAddress((String) payload.get("address"));
+            }
+            if(isValid((String) payload.get("phone"))){
+                user.setPhone((String) payload.get("phone"));
+            }
             user.setPassword((String) payload.get("password"));
-            String dateOfBirthString = (String) payload.get("date_of_birth");
-            LocalDate dateOfBirth = LocalDate.parse(dateOfBirthString);
-            user.setDate_of_birth(dateOfBirth);
+            if(isValid((String) payload.get("date_of_birth"))){
+                String dateOfBirthString = (String) payload.get("date_of_birth");
+                LocalDate dateOfBirth = LocalDate.parse(dateOfBirthString);
+                user.setDate_of_birth(dateOfBirth);
+            }
             String userRoleName = (String) payload.get("user_role");
             UserRole userRole = userRoleRepository.findByName(userRoleName);
             System.out.println("userRole");
@@ -131,6 +137,11 @@ public class UserService {
     private boolean isValidField(Map<String, Object> payload, String field) {
         return payload.containsKey(field) && payload.get(field) != null && !payload.get(field).toString().isEmpty();
     }
+
+    private boolean isValid(String fieldValue) {
+        return fieldValue != null && !fieldValue.isEmpty();
+    }
+
 
     public ResponseEntity<Object> deleteUserById(String userId) {
         try {
