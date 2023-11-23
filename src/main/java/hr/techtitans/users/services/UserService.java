@@ -10,6 +10,7 @@ import hr.techtitans.users.repositories.UserRoleRepository;
 import hr.techtitans.users.repositories.UserStatusRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,12 @@ public class UserService {
 
     public class UserCreationException extends RuntimeException {
         public UserCreationException(String message) {
+            super(message);
+        }
+    }
+
+    public class UserNotFoundException extends RuntimeException {
+        public UserNotFoundException(String message) {
             super(message);
         }
     }
@@ -123,5 +130,25 @@ public class UserService {
 
     private boolean isValidField(Map<String, Object> payload, String field) {
         return payload.containsKey(field) && payload.get(field) != null && !payload.get(field).toString().isEmpty();
+    }
+
+    public ResponseEntity<Object> deleteUserById(String userId) {
+        try {
+            if (userId == null || userId.isEmpty()) {
+                return new ResponseEntity<>("User ID not provided", HttpStatus.BAD_REQUEST);
+            }
+            ObjectId objectId = new ObjectId(userId);
+            if (userRepository.existsById(objectId)) {
+                userRepository.deleteById(objectId);
+                return ResponseEntity.ok("User deleted successfully");
+            } else {
+                return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+            }
+
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>("An error occurred", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
