@@ -6,11 +6,7 @@ import hr.techtitans.users.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -36,5 +32,14 @@ public class UserController {
         } catch (Exception e) {
             return new ResponseEntity<>("An error occurred", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<Object> deleteUser(@PathVariable String userId) {
+        return userService.deleteUserById(userId);
+    }
+    @DeleteMapping("/")
+    public ResponseEntity<String> noUserIdProvided() {
+        return new ResponseEntity<>("Please provide a user ID", HttpStatus.BAD_REQUEST);
     }
 }
