@@ -14,6 +14,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @NoArgsConstructor
 public class UserStatus {
     @Id
-    private String  id;
+    private ObjectId  id;
     private String name;
 }

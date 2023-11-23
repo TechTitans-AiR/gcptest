@@ -41,24 +41,21 @@ public class User {
 
     private String email;
 
-    @JsonFormat(pattern = "dd.MM.yyyy HH:mm:ss")
     private LocalDateTime date_created;
 
-    @JsonFormat(pattern = "dd.MM.yyyy HH:mm:ss")
     private LocalDateTime date_modified;
 
     private String address;
 
     private String phone;
 
-    @JsonFormat(pattern = "dd.MM.yyyy")
     private LocalDate date_of_birth;
 
     public UserRole getUserRole(UserRoleRepository userRoleRepository) {
         return userRoleRepository.findById(userRole).orElse(null);
     }
     public UserStatus getUserStatus(UserStatusRepository userStatusRepository) {
-        return userStatusRepository.findById(userRole).orElse(null);
+        return userStatusRepository.findById(userStatus).orElse(null);
     }
 
 
