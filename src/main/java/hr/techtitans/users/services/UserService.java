@@ -8,6 +8,7 @@ import hr.techtitans.users.models.UserStatus;
 import hr.techtitans.users.repositories.UserRepository;
 import hr.techtitans.users.repositories.UserRoleRepository;
 import hr.techtitans.users.repositories.UserStatusRepository;
+import hr.techtitans.users.utils.JWT;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -21,6 +22,8 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.Date;
+import java.util.Map;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -35,6 +38,13 @@ public class UserService {
 
     @Autowired
     private UserRoleRepository userRoleRepository;
+
+    private JWT jwtUtils;
+
+    @Autowired
+    public UserService(JWT jwtUtils) {
+        this.jwtUtils = jwtUtils;
+    }
 
     public class UserCreationException extends RuntimeException {
         public UserCreationException(String message) {
@@ -101,6 +111,14 @@ public class UserService {
                 }
             }
 
+            if (userRepository.findByUsername((String) payload.get("username")) != null) {
+                throw new UserCreationException("Username already exists");
+            }
+
+            if (userRepository.findByEmail((String) payload.get("email")) != null) {
+                throw new UserCreationException("Email already exists");
+            }
+
             user.setUsername((String) payload.get("username"));
             user.setFirst_name((String) payload.get("first_name"));
             user.setLast_name((String) payload.get("last_name"));
@@ -144,6 +162,7 @@ public class UserService {
         } catch (UserCreationException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>("An error occurred", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -160,20 +179,65 @@ public class UserService {
     public ResponseEntity<Object> deleteUserById(String userId) {
         try {
             if (userId == null || userId.isEmpty()) {
-                return new ResponseEntity<>("User ID not provided", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(Map.of("message", "User ID not provided"), HttpStatus.BAD_REQUEST);
             }
+
             ObjectId objectId = new ObjectId(userId);
             if (userRepository.existsById(objectId)) {
                 userRepository.deleteById(objectId);
-                return ResponseEntity.ok("User deleted successfully");
+                Map<String, Object> responseBody = Map.of("message", "User deleted successfully");
+                return new ResponseEntity<>(responseBody, HttpStatus.OK);
             } else {
+                Map<String, Object> responseBody = Map.of("message", "User not found");
+                return new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND);
+            }
+        } catch (IllegalArgumentException e) {
+            Map<String, Object> responseBody = Map.of("message", "User not found");
+            return new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Map<String, Object> responseBody = Map.of("message", "An error occurred");
+            return new ResponseEntity<>(responseBody, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+
+
+    public ResponseEntity<Object> loginUser(Map<String, Object> payload) {
+        try {
+            if (!isValidField(payload, "username") || !isValidField(payload, "password")) {
+                return new ResponseEntity<>("Username and password are required", HttpStatus.BAD_REQUEST);
+            }
+            System.out.println("UDE");
+            String username = (String) payload.get("username");
+            String password = (String) payload.get("password");
+            System.out.println("UDE"+username);
+            User user =  userRepository.findByUsername(username);
+            System.out.println("User -> "+user);
+            if (user == null) {
                 return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
             }
 
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+            if (!password.equals(user.getPassword())) {
+                return new ResponseEntity<>("Incorrect password", HttpStatus.UNAUTHORIZED);
+            }
+            String roleName = userRoleRepository.getRoleNameById(user.getUserRole()).getName();
+            System.out.println("Role Name: " + roleName);
+            String token = generateJwtToken(username,roleName);
+            if(token != null){
+            System.out.println("TOKEN -> "+token);
+            }else{
+                return new ResponseEntity<>("Cannot create JWT", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+            return new ResponseEntity<>(Map.of("message", "Login successful", "token", token), HttpStatus.OK);
         } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>("An error occurred", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    public String generateJwtToken(String username, String userRole){
+        return jwtUtils.generateToken(username, userRole);
     }
 }
