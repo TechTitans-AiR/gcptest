@@ -1,6 +1,7 @@
 package hr.techtitans.users.services;
 
 
+import at.favre.lib.crypto.bcrypt.BCrypt;
 import hr.techtitans.users.dtos.UserDto;
 import hr.techtitans.users.models.User;
 import hr.techtitans.users.models.UserRole;
@@ -131,7 +132,8 @@ public class UserService {
             if(isValid((String) payload.get("phone"))){
                 user.setPhone((String) payload.get("phone"));
             }
-            user.setPassword((String) payload.get("password"));
+            user.setPassword(hashPassword ((String) payload.get("password")));
+            System.out.println("Password -> "+user.getPassword());
             if(isValid((String) payload.get("date_of_birth"))){
                 String dateOfBirthString = (String) payload.get("date_of_birth");
                 LocalDate dateOfBirth = LocalDate.parse(dateOfBirthString);
@@ -219,14 +221,15 @@ public class UserService {
                 return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
             }
 
-            if (!password.equals(user.getPassword())) {
+            System.out.println("Provjera passworda -> "+checkPassword(password, user.getPassword()));
+            if (!checkPassword(password, user.getPassword())) {
                 return new ResponseEntity<>("Incorrect password", HttpStatus.UNAUTHORIZED);
             }
             String roleName = userRoleRepository.getRoleNameById(user.getUserRole()).getName();
             System.out.println("Role Name: " + roleName);
             String token = generateJwtToken(username,roleName);
             if(token != null){
-            System.out.println("TOKEN -> "+token);
+                System.out.println("TOKEN -> "+token);
             }else{
                 return new ResponseEntity<>("Cannot create JWT", HttpStatus.INTERNAL_SERVER_ERROR);
             }
@@ -239,5 +242,18 @@ public class UserService {
 
     public String generateJwtToken(String username, String userRole){
         return jwtUtils.generateToken(username, userRole);
+    }
+
+    public static String hashPassword(String plainTextPassword) {
+        BCrypt.Hasher hasher = BCrypt.withDefaults();
+        int cost = 12;
+        char[] hashedPasswordChars = hasher.hashToChar(cost, plainTextPassword.toCharArray());
+        return new String(hashedPasswordChars);
+    }
+
+    public static boolean checkPassword(String plainTextPassword, String hashedPassword) {
+        BCrypt.Verifyer verifyer = BCrypt.verifyer();
+        BCrypt.Result result = verifyer.verify(plainTextPassword.toCharArray(), hashedPassword.toCharArray());
+        return result.verified;
     }
 }
