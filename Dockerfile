@@ -1,33 +1,29 @@
 FROM openjdk:19-jdk-alpine
 
-ARG _MONGO_CLUSTER
-ARG _MONGO_PASSWORD
-ARG _MONGODB
-ARG _MONGOUSER
-
 # Instaliraj Maven
 RUN apk add --no-cache maven
 
-
-
-# Stvori potrebne direktorije
-RUN mkdir -p src/main/resources/
-
-# Stvori .env datoteku unutar Docker kontejnera
-RUN echo "MONGO_DATABASE=$_MONGODB" > src/main/resources/.env
-RUN echo "MONGO_USER=$_MONGOUSER" >> src/main/resources/.env
-RUN echo "MONGO_PASSWORD=$_MONGO_PASSWORD" >> src/main/resources/.env
-RUN echo "MONGO_CLUSTER=$_MONGO_CLUSTER" >> src/main/resources/.env
+# Postavi radni direktorij
+WORKDIR /usr/src/app
 
 # Kopiraj POM i sve potrebne datoteke za preuzimanje dependencija
 COPY ./pom.xml .
 COPY ./src ./src
 
+# Postavi varijable okoline koje će biti dostupne tijekom izvođenja Docker slike
+ARG MONGO_DATABASE
+ARG MONGO_USER
+ARG MONGO_PASSWORD
+ARG MONGO_CLUSTER
+
+# Stvori .env datoteku unutar Docker kontejnera
+RUN echo "MONGO_DATABASE=${MONGO_DATABASE}" > src/main/resources/.env
+RUN echo "MONGO_USER=${MONGO_USER}" >> src/main/resources/.env
+RUN echo "MONGO_PASSWORD=${MONGO_PASSWORD}" >> src/main/resources/.env
+RUN echo "MONGO_CLUSTER=${MONGO_CLUSTER}" >> src/main/resources/.env
+
 # Izgradi aplikaciju
 RUN mvn clean install
-
-# Kopiraj .env datoteku izvan Docker kontejnera (za korištenje izvan gradnje)
-COPY src/main/resources/.env /usr/src/app/.env
 
 # Pokreni aplikaciju
 CMD ["java", "-jar", "target/gcptest.jar"]
