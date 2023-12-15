@@ -6,7 +6,7 @@ steps:
       - '--build-arg=_MONGO_CLUSTER=$_MONGO_CLUSTER'
       - '--build-arg=_MONGO_PASSWORD=$_MONGO_PASSWORD'
       - '--build-arg=_MONGODB=$_MONGODB'
-      - '--build-arg=_MONGOUSER=$_MONGO_USER'
+      - '--build-arg=_MONGOUSER=$_MONGOUSER'
       - '-t'
       - 'gcr.io/techtitans-407214/gcptest'
       - '.'
