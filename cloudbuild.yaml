@@ -1,7 +1,15 @@
 steps:
   # Gradnja Docker slike
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/techtitans-407214/gcptest', '.']
+    args:
+      - 'build'
+      - '--build-arg=_MONGO_CLUSTER=value1'
+      - '--build-arg=_MONGO_PASSWORD=value1'
+      - '--build-arg=_MONGODB=value1'
+      - '--build-arg=_MONGO_USER=value1'
+      - '-t'
+      - 'gcr.io/techtitans-407214/gcptest'
+      - '.'
 
   # Postavljanje slike na Google Container Registry
   - name: 'gcr.io/cloud-builders/docker'
