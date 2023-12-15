@@ -12,6 +12,8 @@ ENV MONGO_USER=$_MONGOUSER
 ENV MONGO_PASSWORD=$_MONGO_PASSWORD
 ENV MONGO_CLUSTER=$_MONGO_CLUSTER
 
+COPY .env /path/to/resources/.env
+
 # Instaliraj Maven
 RUN apk add --no-cache maven
 
