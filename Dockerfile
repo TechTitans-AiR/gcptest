@@ -1,4 +1,3 @@
-# Koristi sliku s Javom 19
 FROM openjdk:19-jdk-alpine
 
 ARG _MONGO_CLUSTER
@@ -9,8 +8,10 @@ ARG _MONGOUSER
 # Instaliraj Maven
 RUN apk add --no-cache maven
 
-# Postavi radni direktorij
-WORKDIR /usr/src/app
+
+
+# Stvori potrebne direktorije
+RUN mkdir -p src/main/resources/
 
 # Stvori .env datoteku unutar Docker kontejnera
 RUN echo "MONGO_DATABASE=$_MONGODB" > src/main/resources/.env
@@ -24,6 +25,9 @@ COPY ./src ./src
 
 # Izgradi aplikaciju
 RUN mvn clean install
+
+# Kopiraj .env datoteku izvan Docker kontejnera (za korištenje izvan gradnje)
+COPY src/main/resources/.env /usr/src/app/.env
 
 # Pokreni aplikaciju
 CMD ["java", "-jar", "target/gcptest.jar"]
