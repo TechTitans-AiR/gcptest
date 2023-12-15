@@ -8,7 +8,7 @@ ARG _MONGOUSER
 
 #Pohrani varijable unutar slike
 RUN echo "MONGO_DATABASE=$_MONGODB" >> .env
-RUN echo "MONGO_USER=$_MONGOUSER" >> .env
+RUN echo "MONGO_USER=$_MONGO_USER" >> .env
 RUN echo "MONGO_PASSWORD=$_MONGO_PASSWORD" >> .env
 RUN echo "MONGO_CLUSTER=$_MONGO_CLUSTER" >> .env
 
