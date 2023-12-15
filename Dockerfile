@@ -6,21 +6,18 @@ ARG _MONGO_PASSWORD
 ARG _MONGODB
 ARG _MONGOUSER
 
-# Stvori .env datoteku unutar Docker kontejnera
-RUN echo "MONGO_DATABASE=$_MONGODB" > src/main/resources/.env
-RUN echo "MONGO_USER=$_MONGOUSER" >> src/main/resources/.env
-RUN echo "MONGO_PASSWORD=$_MONGO_PASSWORD" >> src/main/resources/.env
-RUN echo "MONGO_CLUSTER=$_MONGO_CLUSTER" >> src/main/resources/.env
+
 
 # Instaliraj Maven
 RUN apk add --no-cache maven
 
-# Postavi radni direktorij
-WORKDIR /usr/src/app
-
 # Kopiraj POM i sve potrebne datoteke za preuzimanje dependencija
 COPY ./pom.xml .
 COPY ./src ./src
+
+# Kreiraj .env datoteku unutar Docker kontejnera pomoću skripte
+COPY create-env.sh .
+RUN sh create-env.sh
 
 # Izgradi aplikaciju
 RUN mvn clean install
