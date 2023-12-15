@@ -12,8 +12,6 @@ RUN echo "MONGO_USER=$_MONGOUSER" >> src/main/resources/.env
 RUN echo "MONGO_PASSWORD=$_MONGO_PASSWORD" >> src/main/resources/.env
 RUN echo "MONGO_CLUSTER=$_MONGO_CLUSTER" >> src/main/resources/.env
 
-COPY .env src/main/resources/.env
-
 # Instaliraj Maven
 RUN apk add --no-cache maven
 
