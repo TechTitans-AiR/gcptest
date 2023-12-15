@@ -1,6 +1,17 @@
 # Koristi sliku s Javom 19
 FROM openjdk:19-jdk-alpine
 
+ARG _MONGO_CLUSTER
+ARG _MONGO_PASSWORD
+ARG _MONGODB
+ARG _MONGOUSER
+
+#Pohrani varijable unutar slike
+RUN echo "MONGO_DATABASE=$_MONGODB" >> .env
+RUN echo "MONGO_USER=$_MONGOUSER" >> .env
+RUN echo "MONGO_PASSWORD=$_MONGO_PASSWORD" >> .env
+RUN echo "MONGO_CLUSTER=$_MONGO_CLUSTER" >> .env
+
 # Instaliraj Maven
 RUN apk add --no-cache maven
 
