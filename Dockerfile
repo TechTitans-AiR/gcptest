@@ -6,13 +6,13 @@ ARG _MONGO_PASSWORD
 ARG _MONGODB
 ARG _MONGOUSER
 
-# Postavi varijable okoline
-ENV MONGO_DATABASE=$_MONGODB
-ENV MONGO_USER=$_MONGOUSER
-ENV MONGO_PASSWORD=$_MONGO_PASSWORD
-ENV MONGO_CLUSTER=$_MONGO_CLUSTER
+# Stvori .env datoteku unutar Docker kontejnera
+RUN echo "MONGO_DATABASE=$_MONGODB" > src/main/resources/.env
+RUN echo "MONGO_USER=$_MONGOUSER" >> src/main/resources/.env
+RUN echo "MONGO_PASSWORD=$_MONGO_PASSWORD" >> src/main/resources/.env
+RUN echo "MONGO_CLUSTER=$_MONGO_CLUSTER" >> src/main/resources/.env
 
-COPY .env /path/to/resources/.env
+COPY .env src/main/resources/.env
 
 # Instaliraj Maven
 RUN apk add --no-cache maven
